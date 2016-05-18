@@ -112,7 +112,7 @@ def main():
             tclient.upload(options.upload,
                            options.input,
                            progresshook)
-    except tftpy.TftpException, err:
+    except tftpy.TftpException as err:
         sys.stderr.write("%s\n" % str(err))
         sys.exit(1)
     except KeyboardInterrupt:

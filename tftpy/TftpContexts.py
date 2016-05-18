@@ -8,11 +8,13 @@ the next packet in the transfer, and returns a state object until the transfer
 is complete, at which point it returns None. That is, unless there is a fatal
 error, in which case a TftpException is returned instead."""
 
-from TftpShared import *
-from TftpPacketTypes import *
-from TftpPacketFactory import TftpPacketFactory
-from TftpStates import *
-import socket, time, sys
+import socket
+import sys
+import time
+
+from tftpy.TftpPacketFactory import TftpPacketFactory
+from tftpy.TftpStates import *
+
 
 ###############################################################################
 # Utility classes
@@ -114,10 +116,10 @@ class TftpContext(object):
         if we're over the timeout time."""
         log.debug("checking for timeout on session %s", self)
         if now - self.last_update > self.timeout:
-            raise TftpTimeout, "Timeout waiting for traffic"
+            raise TftpTimeout("Timeout waiting for traffic")
 
     def start(self):
-        raise NotImplementedError, "Abstract method"
+        raise NotImplementedError("Abstract method")
 
     def end(self):
         """Perform session cleanup, since the end method should always be
@@ -159,7 +161,7 @@ class TftpContext(object):
             (buffer, (raddress, rport)) = self.sock.recvfrom(MAX_BLKSIZE)
         except socket.timeout:
             log.warn("Timeout waiting for traffic, retrying...")
-            raise TftpTimeout, "Timed-out waiting for traffic"
+            raise TftpTimeout("Timed-out waiting for traffic")
 
         # Ok, we've received a packet. Log it.
         log.debug("Received %d bytes from %s:%s",
@@ -300,7 +302,7 @@ class TftpContextClientUpload(TftpContext):
             try:
                 log.debug("State is %s", self.state)
                 self.cycle()
-            except TftpTimeout, err:
+            except TftpTimeout as err:
                 log.error(str(err))
                 self.retry_count += 1
                 if self.retry_count >= TIMEOUT_RETRIES:
@@ -379,7 +381,7 @@ class TftpContextClientDownload(TftpContext):
             try:
                 log.debug("State is %s", self.state)
                 self.cycle()
-            except TftpTimeout, err:
+            except TftpTimeout as err:
                 log.error(str(err))
                 self.retry_count += 1
                 if self.retry_count >= TIMEOUT_RETRIES:

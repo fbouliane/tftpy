@@ -2,8 +2,9 @@
 buffer, and return the appropriate TftpPacket object to represent it, via the
 parse() method."""
 
-from TftpShared import *
-from TftpPacketTypes import *
+from tftpy.TftpShared import *
+from tftpy.TftpPacketTypes import *
+
 
 class TftpPacketFactory(object):
     """This class generates TftpPacket objects. It is responsible for parsing

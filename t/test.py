@@ -378,7 +378,7 @@ class TestTftpyState(unittest.TestCase):
             signal.alarm(2)
             try:
                 server.listen('localhost', 20001)
-            except Exception, err:
+            except Exception as err:
                 self.assertTrue( err[0] == 4 )
 
     def testServerDownloadWithStopNotNow(self, output='/tmp/out'):
@@ -415,7 +415,7 @@ class TestTftpyState(unittest.TestCase):
             signal.alarm(2)
             try:
                 server.listen('localhost', 20001)
-            except Exception, err:
+            except Exception as err:
                 self.assertTrue( False, "Server should not exit early" )
 
     def testServerDownloadWithDynamicPort(self, output='/tmp/out'):
