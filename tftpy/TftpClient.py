@@ -20,9 +20,9 @@ class TftpClient(TftpSession):
         self.filename = None
         self.options = options
         self.localip = localip
-        if self.options.has_key('blksize'):
+        if 'blksize' in self.options:
             size = self.options['blksize']
-            tftpassert(types.IntType == type(size), "blksize must be an int")
+            tftpassert(int == type(size), "blksize must be an int")
             if size < MIN_BLKSIZE or size > MAX_BLKSIZE:
                 raise TftpException("Invalid blksize: {}".format(size))
 

@@ -57,8 +57,9 @@ class TftpPacketWithOptions(object):
 
         # Count the nulls in the buffer. Each one terminates a string.
         log.debug("about to iterate options buffer counting nulls")
+
         length = 0
-        for c in buffer:
+        for c in buffer.decode():
             if ord(c) == 0:
                 log.debug("found a null at length %d", length)
                 if length > 0:
@@ -76,7 +77,7 @@ class TftpPacketWithOptions(object):
 
         for i in range(0, len(mystruct), 2):
             log.debug("setting option %s to %s", mystruct[i], mystruct[i+1])
-            options[mystruct[i]] = mystruct[i+1]
+            options[mystruct[i].decode()] = mystruct[i+1].decode()
 
         return options
 
@@ -133,18 +134,18 @@ class TftpPacketInitial(TftpPacket, TftpPacketWithOptions):
         if self.mode == "octet":
             format += "5sx"
         else:
-            raise AssertionError("Unsupported mode: {}".format(mode))
+            raise AssertionError("Unsupported mode: {}".format(self.mode))
         # Add options.
         options_list = []
-        if self.options.keys() > 0:
+        if len(self.options) > 0:
             log.debug("there are options to encode")
             for key in self.options:
                 # Populate the option name
                 format += "%dsx" % len(key)
-                options_list.append(key)
+                options_list.append(str.encode(key))
                 # Populate the option value
                 format += "%dsx" % len(str(self.options[key]))
-                options_list.append(str(self.options[key]))
+                options_list.append(str.encode(self.options[key]))
 
         log.debug("format is %s", format)
         log.debug("options_list is %s", options_list)
@@ -152,8 +153,8 @@ class TftpPacketInitial(TftpPacket, TftpPacketWithOptions):
 
         self.buffer = struct.pack(format,
                                   self.opcode,
-                                  self.filename,
-                                  self.mode,
+                                  str.encode(self.filename),
+                                  str.encode(self.mode),
                                   *options_list)
 
         log.debug("buffer is %s", repr(self.buffer))
@@ -168,7 +169,7 @@ class TftpPacketInitial(TftpPacket, TftpPacketWithOptions):
         nulls = length = tlength = 0
         log.debug("in decode: about to iterate buffer counting nulls")
         subbuf = self.buffer[2:]
-        for c in subbuf:
+        for c in subbuf.decode():
             if ord(c) == 0:
                 nulls += 1
                 log.debug("found a null at length %d, now have %d", length, nulls)
@@ -189,8 +190,8 @@ class TftpPacketInitial(TftpPacket, TftpPacketWithOptions):
         mystruct = struct.unpack(format, shortbuf)
 
         tftpassert(len(mystruct) == 2, "malformed packet")
-        self.filename = mystruct[0]
-        self.mode = mystruct[1].lower() # force lc - bug 17
+        self.filename = mystruct[0].decode()
+        self.mode = mystruct[1].decode().lower() # force lc - bug 17
         log.debug("set filename to %s", self.filename)
         log.debug("set mode to %s", self.mode)
 
@@ -263,11 +264,11 @@ class TftpPacketDAT(TftpPacket):
         returns self for easy method chaining."""
         if len(self.data) == 0:
             log.debug("Encoding an empty DAT packet")
-        format = "!HH%ds" % len(self.data)
+        format = "!HH{}s".format(len(self.data))
         self.buffer = struct.pack(format,
                                   self.opcode,
                                   self.blocknumber,
-                                  self.data)
+                                  str.encode(self.data))
         return self
 
     def decode(self):
@@ -279,7 +280,7 @@ class TftpPacketDAT(TftpPacket):
         log.debug("decoding DAT packet, block number %d", self.blocknumber)
         log.debug("should be %d bytes in the packet total", len(self.buffer))
         # Everything else is data.
-        self.data = self.buffer[4:]
+        self.data = self.buffer[4:].decode()
         log.debug("found %d bytes of data", len(self.data))
         return self
 
@@ -370,7 +371,7 @@ class TftpPacketERR(TftpPacket):
         self.buffer = struct.pack(format,
                                   self.opcode,
                                   self.errorcode,
-                                  self.errmsgs[self.errorcode])
+                                  self.errmsgs[self.errorcode].encode())
         return self
 
     def decode(self):
@@ -419,8 +420,8 @@ class TftpPacketOACK(TftpPacket, TftpPacketWithOptions):
             log.debug("value is %s", self.options[key])
             format += "%dsx" % len(key)
             format += "%dsx" % len(self.options[key])
-            options_list.append(key)
-            options_list.append(self.options[key])
+            options_list.append(key.encode())
+            options_list.append(str.encode(self.options[key]))
         self.buffer = struct.pack(format, self.opcode, *options_list)
         return self
 
