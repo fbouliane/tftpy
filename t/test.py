@@ -9,6 +9,7 @@ import threading
 
 log = tftpy.log
 
+
 class TestTftpyClasses(unittest.TestCase):
 
     def setUp(self):
@@ -137,6 +138,7 @@ class TestTftpyClasses(unittest.TestCase):
                                     classes[opcode]),
                                     "opcode %d returns the correct class" % opcode)
 
+
 class TestTftpyState(unittest.TestCase):
 
     def setUp(self):
@@ -200,7 +202,7 @@ class TestTftpyState(unittest.TestCase):
         self.clientServerDownloadOptions({'tsize': 64*1024})
 
     def testClientFileObject(self):
-        output = open('/tmp/out', 'w')
+        output = open('/tmp/out', 'wb')
         self.clientServerDownloadOptions({}, output)
 
     def testClientServerBlksize(self):
@@ -211,7 +213,8 @@ class TestTftpyState(unittest.TestCase):
         self.clientServerUploadOptions({})
 
     def testClientServerUploadFileObj(self):
-        fileobj = open('t/640KBFILE', 'r')
+        file_640k = os.path.join(os.path.dirname(__file__), '640KBFILE')
+        fileobj = open(file_640k, 'rb')
         self.clientServerUploadOptions({}, input=fileobj)
 
     def testClientServerUploadWithSubdirs(self):

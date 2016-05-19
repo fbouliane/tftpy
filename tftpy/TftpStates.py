@@ -33,7 +33,7 @@ class TftpState(object):
     def handleOACK(self, pkt):
         """This method handles an OACK from the server, syncing any accepted
         options."""
-        if pkt.options.keys() > 0:
+        if len(pkt.options) > 0:
             if pkt.match_options(self.context.options):
                 log.info("Successful negotiation of options")
                 # Set options to OACK options
@@ -170,8 +170,9 @@ class TftpState(object):
             self.context.next_block += 1
 
             log.debug("Writing %d bytes to output file", len(pkt.data))
-            self.context.fileobj.write(pkt.data)
-            self.context.metrics.bytes += len(pkt.data)
+            if len(pkt.data) > 0:
+                self.context.fileobj.write(pkt.data)
+                self.context.metrics.bytes += len(pkt.data)
             # Check for end-of-file, any less than full data packet.
             if len(pkt.data) < self.context.getBlocksize():
                 log.info("End of file detected")
@@ -310,7 +311,7 @@ class TftpStateServerRecvRRQ(TftpServerState):
             raise TftpException("File not found: %s" % path)
 
         # Options negotiation.
-        if sendoack and self.context.options.has_key('tsize'):
+        if sendoack and 'tsize' in self.context.options:
             # getting the file size for the tsize option. As we handle
             # file-like objects and not only real files, we use this seeking
             # method instead of asking the OS

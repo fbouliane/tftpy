@@ -59,7 +59,7 @@ class TftpPacketWithOptions(object):
         log.debug("about to iterate options buffer counting nulls")
 
         length = 0
-        for c in buffer.decode():
+        for c in decode_to_str(buffer):
             if ord(c) == 0:
                 log.debug("found a null at length %d", length)
                 if length > 0:
@@ -77,7 +77,7 @@ class TftpPacketWithOptions(object):
 
         for i in range(0, len(mystruct), 2):
             log.debug("setting option %s to %s", mystruct[i], mystruct[i+1])
-            options[mystruct[i].decode()] = mystruct[i+1].decode()
+            options[decode_to_str(mystruct[i])] = decode_to_str(mystruct[i+1])
 
         return options
 
@@ -268,7 +268,7 @@ class TftpPacketDAT(TftpPacket):
         self.buffer = struct.pack(format,
                                   self.opcode,
                                   self.blocknumber,
-                                  str.encode(self.data))
+                                  encode_to_byte(self.data))
         return self
 
     def decode(self):
@@ -280,7 +280,7 @@ class TftpPacketDAT(TftpPacket):
         log.debug("decoding DAT packet, block number %d", self.blocknumber)
         log.debug("should be %d bytes in the packet total", len(self.buffer))
         # Everything else is data.
-        self.data = self.buffer[4:].decode()
+        self.data = decode_to_str(self.buffer[4:])
         log.debug("found %d bytes of data", len(self.data))
         return self
 
@@ -371,7 +371,7 @@ class TftpPacketERR(TftpPacket):
         self.buffer = struct.pack(format,
                                   self.opcode,
                                   self.errorcode,
-                                  self.errmsgs[self.errorcode].encode())
+                                  encode_to_byte(self.errmsgs[self.errorcode]))
         return self
 
     def decode(self):
@@ -420,8 +420,8 @@ class TftpPacketOACK(TftpPacket, TftpPacketWithOptions):
             log.debug("value is %s", self.options[key])
             format += "%dsx" % len(key)
             format += "%dsx" % len(self.options[key])
-            options_list.append(key.encode())
-            options_list.append(str.encode(self.options[key]))
+            options_list.append(encode_to_byte(key))
+            options_list.append(encode_to_byte(self.options[key]))
         self.buffer = struct.pack(format, self.opcode, *options_list)
         return self
 
@@ -436,7 +436,7 @@ class TftpPacketOACK(TftpPacket, TftpPacketWithOptions):
         the options so that the session can update itself to the negotiated
         options."""
         for name in self.options:
-            if options.has_key(name):
+            if name in options:
                 if name == 'blksize':
                     # We can accept anything between the min and max values.
                     size = int(self.options[name])

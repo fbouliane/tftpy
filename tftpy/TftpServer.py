@@ -135,7 +135,7 @@ class TftpServer(TftpSession):
                     # which should safely work through NAT.
                     key = "%s:%s" % (raddress, rport)
 
-                    if not self.sessions.has_key(key):
+                    if key not in self.sessions:
                         log.debug("Creating new server context for "
                                      "session key = %s", key)
                         self.sessions[key] = TftpContextServer(raddress,
@@ -200,7 +200,7 @@ class TftpServer(TftpSession):
             for key in deletion_list:
                 log.info('')
                 log.info("Session %s complete" % key)
-                if self.sessions.has_key(key):
+                if key in self.sessions:
                     log.debug("Gathering up metrics from session before deleting")
                     self.sessions[key].end()
                     metrics = self.sessions[key].metrics

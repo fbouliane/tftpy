@@ -56,7 +56,7 @@ class TftpMetrics(object):
         """This method adds a dup for a packet to the metrics."""
         log.debug("Recording a dup of %s", pkt)
         s = str(pkt)
-        if self.dups.has_key(s):
+        if s in self.dups:
             self.dups[s] += 1
         else:
             self.dups[s] = 1

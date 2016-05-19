@@ -13,7 +13,7 @@ test:
 	PYTHONPATH=$(PYTHONPATH) $(PY) t/test.py 2>&1 | tee test.log
 
 clean:
-	rm -rf dist src tftpy-doc* MANIFEST
+	rm -rf dist src tftpy-doc* MANIFEST /tmp/out /tmp/log
 
 flakes:
 	pyflakes bin/*.py tftpy/*.py

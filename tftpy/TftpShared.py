@@ -93,3 +93,17 @@ class TftpTimeout(TftpException):
     """This class represents a timeout error waiting for a response from the
     other end."""
     pass
+
+
+def encode_to_byte(data):
+    try:
+        return str.encode(data)
+    except TypeError:
+        return data
+
+
+def decode_to_str(data):
+    try:
+        return data.decode()
+    except (AssertionError, UnicodeDecodeError):
+        return data
