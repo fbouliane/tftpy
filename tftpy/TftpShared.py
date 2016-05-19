@@ -98,7 +98,7 @@ class TftpTimeout(TftpException):
 def encode_to_byte(data):
     try:
         return str.encode(data)
-    except TypeError:
+    except (TypeError, UnicodeDecodeError):
         return data
 
 
